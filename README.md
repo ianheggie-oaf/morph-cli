@@ -27,9 +27,30 @@ You'll need Ruby >= 1.9 and then
 
 ## Limitations
 
-It uploads your code everytime. So if it's big it might take a little while. Scrapers are not usually so I'm hoping this won't really be an issue
+It uploads your (git) files everytime, excepting 
 
-It doesn't yet return you the resulting sqlite database (or use the one you might have locally)
+* directories: screenshots, tests (coverage, features, spec, test dirs), tmp and directories that start with '.' 
+* `*.md` (docs) and `data.sqlite` (database).
+
+So if it's big it might take a little while, and if its really too big it will be rejected!
+Scrapers are not usually too big, so I'm hoping this won't really be an issue.
+
+Note, if there is a `.git` directory it uses `git ls-files` to only upload significant files,
+otherwise it relies on the exclusions listed above to keep the upload size reasonable.
+
+Add the following to your `scraper.rb` just after the call to `Scraper.run`
+if you want the data.sqlite database to be dumped to the log file when run by morph cli.
+Morph-cli will save the dump to `tmp/data.sql`, remove `data.sqlite` and then run `sqlite3 data.sqlite < tmp/data.sql`
+to recreate the database locally.
+
+```ruby
+  # Dump database for morph-cli
+  if File.exist?("tmp/dump-data-sqlite")
+    puts '-- dump of data.sqlite --'
+    system "sqlite3 data.sqlite .dump"
+    puts '-- end of dump --'
+  end
+```
 
 ## Contributing
 
